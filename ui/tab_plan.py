@@ -6,7 +6,7 @@ from components import plan_entry, section
 
 
 def render(patient: pd.DataFrame, art: dict) -> None:
-    risk = float(art['ensemble'].predict_mean(patient)[0])
+    risk = float(art['dist'].mean())
     section("Personalized preventive actions",
             "Deliberately rule-based, from published clinical reference ranges — "
             "every advice line traces to a guideline, not a statistical artifact.")

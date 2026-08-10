@@ -11,7 +11,7 @@ from theme import INK, MOSS, OXBLOOD, POP_GREY, styled
 def render(patient: pd.DataFrame, art: dict) -> None:
     (ax_x, label_x), (ax_y, label_y) = art['config'].similar_axes
     view = art['similar'].query(patient)
-    ens_risk = float(art['ensemble'].predict_mean(patient)[0])
+    ens_risk = float(art['dist'].mean())
 
     st.markdown(
         f"### Of the **{view.n_neighbors}** most similar patients, "

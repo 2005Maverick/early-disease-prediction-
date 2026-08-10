@@ -6,17 +6,16 @@ import pandas as pd
 import streamlit as st
 
 from components import finding_block, section
-from edp.drivers import compute_drivers
+from compute import driver_rows
 from edp.risk import classify
 from theme import INK, MOSS, MUTED, OXBLOOD, styled
 
 
 def render(patient: pd.DataFrame, art: dict) -> None:
     friendly = art['config'].friendly
-    ensemble = art['ensemble']
     threshold = art['report']['threshold']
 
-    dist = ensemble.predict_dist(patient)[:, 0]
+    dist = art['dist']
     mean_risk = float(dist.mean())
     lo, hi = float(np.percentile(dist, 5)), float(np.percentile(dist, 95))
     tier = classify(mean_risk, threshold)
@@ -43,11 +42,11 @@ def render(patient: pd.DataFrame, art: dict) -> None:
     section("Personal risk drivers",
             "How much each factor adds to this patient's risk, measured by "
             "replacing it with the study's typical (median) value.")
-    drivers = compute_drivers(ensemble.predict_mean, patient, art['medians'])
+    drivers = driver_rows(art['config'].key, art['values'])
     drv_df = pd.DataFrame([
-        {'Factor': friendly.get(d.feature, d.feature),
-         'Adds to risk (%)': round(d.risk_delta * 100, 1)}
-        for d in drivers if abs(d.risk_delta) >= 0.005
+        {'Factor': friendly.get(d['feature'], d['feature']),
+         'Adds to risk (%)': round(d['risk_delta'] * 100, 1)}
+        for d in drivers if abs(d['risk_delta']) >= 0.005
     ])
     if drv_df.empty:
         st.info("No single factor stands out - risk is spread across many small effects.")
