@@ -14,6 +14,7 @@ from theme import MUTED, OXBLOOD, styled
 
 def render(art: dict) -> None:
     report = art['report']
+    st.caption(f"Model: {report['disease']} — trained on {report['trained_on']}.")
 
     section("The dataset's hidden missing values",
             "Zeros in these columns are physiologically impossible — "

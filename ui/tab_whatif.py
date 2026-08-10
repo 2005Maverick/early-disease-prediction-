@@ -4,14 +4,14 @@ import pandas as pd
 import streamlit as st
 
 from components import section
-from edp.whatif import build_scenarios, evaluate_scenarios
+from edp.whatif import evaluate_scenarios
 from theme import MOSS, OXBLOOD, styled
 
 
 def render(patient: pd.DataFrame, art: dict) -> None:
     ensemble = art['ensemble']
     base_risk = float(ensemble.predict_mean(patient)[0])
-    scenarios = build_scenarios(patient)
+    scenarios = art['config'].build_scenarios(patient)
 
     section("If this patient made one change",
             "Each row re-runs all 200 models with one value changed. "

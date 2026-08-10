@@ -1,8 +1,13 @@
 # Early Disease Prediction System
 
-Predicts diabetes risk **before symptoms appear** from lifestyle, demographic
-and clinical data — with honest uncertainty, an independent second opinion,
-and a personalized prevention plan.
+Predicts **diabetes and heart disease** risk before symptoms appear from
+lifestyle, demographic and clinical data — with honest uncertainty, an
+independent second opinion, and a personalized prevention plan.
+
+One disease-agnostic engine, many diseases: each disease is a config object
+(dataset, features, intake form, what-if scenarios, prevention rules); the
+uncertainty ensemble, similarity engine, explanations and UI are shared.
+Adding a disease means adding one config file and retraining.
 
 ## What makes this different
 
@@ -28,18 +33,22 @@ and a personalized prevention plan.
 ## Architecture
 
 ```
-datasets/diabetes.csv          Pima study, 768 patients
+datasets/
+  diabetes.csv   Pima study, 768 patients
+  heart.csv      UCI Cleveland study, 303 patients
 src/edp/
-  data.py        Data layer      zeros → missing → imputed per fold
+  diseases/      One config per disease: features, intake form,
+                 what-if scenarios, prevention rules  (base.py = contract)
+  data.py        Data layer      hidden missing values → imputed per fold
   pipeline.py    Base learner    impute → scale → gradient boosting
   ensemble.py    Uncertainty Engine   200 bootstrap models → distribution
   neighbors.py   Patients Like You    standardized 50-nearest-neighbors
   risk.py        Decision layer  threshold from the recall rule; risk tiers
   drivers.py     Explanation     median-substitution risk drivers
-  whatif.py      Explanation     lifestyle-change scenarios
-  recommend.py   Prevention      clinical-guideline rules
-  train.py       Training + honest evaluation → models/ artifacts
-ui/              Streamlit dashboard (5 tabs)
+  whatif.py      Explanation     generic scenario evaluation
+  recommend.py   Prevention      shared Recommendation type
+  train.py       Trains + honestly evaluates EVERY disease → models/<key>/
+ui/              Streamlit dashboard (disease selector + 5 report sections)
 tests/           pytest suite (unit + integration)
 ```
 

@@ -1,40 +1,59 @@
-"""Intake form. A real form: nothing runs until 'Run assessment' is pressed.
+"""Intake: disease selector + a config-driven form.
 
-Values marked unknown become NaN - the pipeline imputes the study median,
-so the instrument works with incomplete labs.
+The selector lives OUTSIDE the form (changing it redraws the fields);
+the fields live INSIDE a form, so nothing runs until 'Run assessment'.
+Unknown values become NaN - the pipeline imputes the study median.
 """
 import numpy as np
 import pandas as pd
 import streamlit as st
 
-from edp.data import ALL_FEATURES
+from edp.diseases import REGISTRY
+from edp.diseases.base import DiseaseConfig
 
 
-def intake_form() -> tuple[pd.DataFrame | None, bool]:
-    """Render the sidebar intake form; return (patient, submitted)."""
-    with st.sidebar.form("intake", border=False):
+def _render_field(spec: dict) -> float:
+    kind = spec['kind']
+    if kind in ('number', 'number_unknown'):
+        kwargs = {k: spec[k] for k in ('step', 'format', 'help') if k in spec}
+        value = st.number_input(spec['label'], spec['min'], spec['max'],
+                                spec['default'], **kwargs)
+        if kind == 'number_unknown':
+            unknown = st.checkbox(f"{spec['label'].split(' (')[0]} unknown",
+                                  value=spec.get('unknown_default', False),
+                                  key=f"unk_{spec['col']}")
+            return np.nan if unknown else value
+        return value
+    if kind in ('select', 'select_unknown'):
+        labels = [lb for lb, _ in spec['options']]
+        values = [v for _, v in spec['options']]
+        if kind == 'select_unknown':
+            labels.append('Unknown')
+            values.append(np.nan)
+        choice = st.selectbox(spec['label'], labels,
+                              index=spec.get('default_index', 0),
+                              key=f"sel_{spec['col']}")
+        return values[labels.index(choice)]
+    if kind == 'flag':
+        return 1 if st.checkbox(spec['label'], key=f"flag_{spec['col']}") else 0
+    raise ValueError(f"Unknown form field kind: {kind}")
+
+
+def intake_form() -> tuple[DiseaseConfig, pd.DataFrame | None, bool]:
+    """Render the sidebar intake; return (config, patient, submitted)."""
+    names = {c.name: c for c in REGISTRY.values()}
+    with st.sidebar:
         st.header("Patient intake")
-        glucose = st.number_input("Glucose (2h OGTT, mg/dL)", 40, 300, 120)
-        bmi = st.number_input("BMI", 15.0, 70.0, 30.0, step=0.1, format="%.1f")
-        age = st.number_input("Age (years)", 18, 100, 33)
-        blood_pressure = st.number_input("Blood pressure (diastolic, mm Hg)",
-                                         30, 140, 70)
-        pregnancies = st.number_input("Pregnancies", 0, 20, 2)
-        pedigree = st.number_input("Family history score (pedigree)", 0.0, 2.5,
-                                   0.4, step=0.01, format="%.2f",
-                                   help="Higher = more relatives with diabetes")
-        insulin = st.number_input("Insulin (2h serum, mu U/ml)", 10, 900, 100)
-        insulin_unknown = st.checkbox("Insulin unknown")
-        skin = st.number_input("Skin thickness (mm)", 5, 100, 25)
-        skin_unknown = st.checkbox("Skin thickness unknown", value=True)
-        st.caption("Unknown values are imputed with the study median.")
-        submitted = st.form_submit_button("Run assessment", type="primary")
-
+        chosen = st.radio("Assessment for", list(names), index=0,
+                          horizontal=True)
+        config = names[chosen]
+        with st.form(f"intake_{config.key}", border=False):
+            values: dict[str, float] = {}
+            for spec in config.form_spec:
+                values[spec['col']] = _render_field(spec)
+            st.caption("Unknown values are imputed with the study median.")
+            submitted = st.form_submit_button("Run assessment", type="primary")
     if not submitted:
-        return None, False
-    row = {'Pregnancies': pregnancies, 'Glucose': glucose,
-           'BloodPressure': blood_pressure,
-           'SkinThickness': np.nan if skin_unknown else skin,
-           'Insulin': np.nan if insulin_unknown else insulin,
-           'BMI': bmi, 'DiabetesPedigreeFunction': pedigree, 'Age': age}
-    return pd.DataFrame([row], columns=list(ALL_FEATURES)), True
+        return config, None, False
+    patient = pd.DataFrame([values], columns=list(config.features))
+    return config, patient, True

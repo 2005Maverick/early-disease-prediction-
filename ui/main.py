@@ -1,7 +1,8 @@
 """Early Disease Prediction System - entry point.
 
-Flow: intake form -> Run assessment -> report. Nothing is predicted until
-the user asks; the report always names the patient it describes.
+Flow: choose disease -> intake form -> Run assessment -> report. Nothing is
+predicted until the user asks; the report always names the patient and the
+disease it describes.
 
 Run:  .venv\\Scripts\\python.exe -m streamlit run ui\\main.py
 """
@@ -23,20 +24,25 @@ from inputs import intake_form                     # noqa: E402
 import tab_risk, tab_similar, tab_whatif, tab_plan, tab_lab  # noqa: E402
 
 inject_css()
-art = load_artifacts()
+arts = load_artifacts()
 
-patient, submitted = intake_form()
+config, patient, submitted = intake_form()
 if submitted:
-    st.session_state['patient'] = patient
+    st.session_state['assessed'] = {'key': config.key, 'patient': patient}
 
 masthead()
 
-if 'patient' not in st.session_state:
+assessed = st.session_state.get('assessed')
+if not assessed or assessed['key'] != config.key:
+    if assessed and assessed['key'] != config.key:
+        st.info(f"The intake is now set to **{config.name}** — fill the form "
+                "and run the assessment to produce this report.")
     intake_state()
     st.stop()
 
-patient = st.session_state['patient']
-patient_strip(patient)
+patient = assessed['patient']
+art = arts[config.key]
+patient_strip(patient, config)
 
 tabs = st.tabs(["Findings", "Patients Like You", "What-If Simulator",
                 "Preventive Plan", "Data & Model Lab"])

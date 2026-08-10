@@ -10,13 +10,9 @@ from edp.drivers import compute_drivers
 from edp.risk import classify
 from theme import INK, MOSS, MUTED, OXBLOOD, styled
 
-FRIENDLY = {'Pregnancies': 'Pregnancies', 'Glucose': 'Blood glucose',
-            'BloodPressure': 'Blood pressure', 'SkinThickness': 'Skin thickness',
-            'Insulin': 'Insulin', 'BMI': 'BMI',
-            'DiabetesPedigreeFunction': 'Family history', 'Age': 'Age'}
-
 
 def render(patient: pd.DataFrame, art: dict) -> None:
+    friendly = art['config'].friendly
     ensemble = art['ensemble']
     threshold = art['report']['threshold']
 
@@ -49,7 +45,8 @@ def render(patient: pd.DataFrame, art: dict) -> None:
             "replacing it with the study's typical (median) value.")
     drivers = compute_drivers(ensemble.predict_mean, patient, art['medians'])
     drv_df = pd.DataFrame([
-        {'Factor': FRIENDLY[d.feature], 'Adds to risk (%)': round(d.risk_delta * 100, 1)}
+        {'Factor': friendly.get(d.feature, d.feature),
+         'Adds to risk (%)': round(d.risk_delta * 100, 1)}
         for d in drivers if abs(d.risk_delta) >= 0.005
     ])
     if drv_df.empty:

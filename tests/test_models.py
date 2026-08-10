@@ -3,7 +3,7 @@ import numpy as np
 import pandas as pd
 import pytest
 
-from edp.data import ALL_FEATURES
+from edp.diseases.diabetes import FEATURES as ALL_FEATURES
 from edp.ensemble import UncertaintyEnsemble
 from edp.neighbors import PatientsLikeYou
 

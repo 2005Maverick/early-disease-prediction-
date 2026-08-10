@@ -1,12 +1,9 @@
-"""Train, honestly evaluate, and save all artifacts.
+"""Train, honestly evaluate, and save artifacts for EVERY registered disease.
 
 Honesty rules baked in:
-- Every reported metric is OUT-OF-FOLD: computed on patients the model never
-  saw during training (stratified 5-fold cross-validation).
-- Imputation and scaling live inside the pipelines, so they are re-fitted per
-  fold - no leakage.
-- The alert threshold is chosen by the stated recall rule, on out-of-fold
-  scores only.
+- Every reported metric is OUT-OF-FOLD (stratified 5-fold cross-validation).
+- Imputation and scaling live inside the pipelines - no leakage.
+- The alert threshold is chosen by the stated recall rule per disease.
 
 Run from the project root:  .venv\\Scripts\\python.exe src\\edp\\train.py
 """
@@ -26,13 +23,14 @@ from sklearn.metrics import (accuracy_score, f1_score, precision_score,
 from sklearn.model_selection import StratifiedKFold
 
 from edp.data import load_clean, missingness_report
+from edp.diseases import REGISTRY
+from edp.diseases.base import DiseaseConfig
 from edp.ensemble import UncertaintyEnsemble
 from edp.neighbors import PatientsLikeYou
 from edp.pipeline import build_baselines
 from edp.risk import MIN_RECALL, select_threshold
 
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
-DATASET = PROJECT_ROOT / 'datasets' / 'diabetes.csv'
 MODELS_DIR = PROJECT_ROOT / 'models'
 CV_FOLDS = 5
 CV_MEMBERS = 40      # ensemble size inside each CV fold (speed)
@@ -70,7 +68,6 @@ def out_of_fold_scores(X: pd.DataFrame, y: pd.Series) -> dict[str, np.ndarray]:
 
 
 def calibration_bins(y: np.ndarray, score: np.ndarray, n_bins: int = 10) -> list[dict]:
-    """Predicted vs observed risk per score decile - proof the numbers are honest."""
     order = np.argsort(score)
     bins = np.array_split(order, n_bins)
     return [
@@ -81,9 +78,10 @@ def calibration_bins(y: np.ndarray, score: np.ndarray, n_bins: int = 10) -> list
     ]
 
 
-def main() -> None:
+def train_disease(config: DiseaseConfig) -> None:
     t0 = time.time()
-    X, y = load_clean(DATASET)
+    print(f"\n=== {config.name} ({config.key}) ===")
+    X, y = load_clean(config, PROJECT_ROOT)
     y_arr = y.to_numpy()
     print(f"Loaded {len(X)} patients, {X.shape[1]} features")
 
@@ -99,11 +97,13 @@ def main() -> None:
     ensemble = UncertaintyEnsemble(n_members=FINAL_MEMBERS, random_state=42).fit(X, y)
     similar = PatientsLikeYou(n_neighbors=50).fit(X, y)
 
-    MODELS_DIR.mkdir(exist_ok=True)
-    joblib.dump(ensemble, MODELS_DIR / 'ensemble.pkl')
-    joblib.dump(similar, MODELS_DIR / 'neighbors.pkl')
+    out_dir = MODELS_DIR / config.key
+    out_dir.mkdir(parents=True, exist_ok=True)
+    joblib.dump(ensemble, out_dir / 'ensemble.pkl')
+    joblib.dump(similar, out_dir / 'neighbors.pkl')
     report = {
-        'trained_on': f'{len(X)} patients (Pima study)',
+        'disease': config.name,
+        'trained_on': f'{len(X)} patients - {config.dataset_note}',
         'cv_folds': CV_FOLDS,
         'cv_members': CV_MEMBERS,
         'final_members': FINAL_MEMBERS,
@@ -113,12 +113,17 @@ def main() -> None:
         'model_comparison': comparison,
         'calibration': calibration_bins(y_arr, ens_scores),
         'population_medians': {k: round(float(v), 2) for k, v in X.median().items()},
-        'missingness': missingness_report(DATASET).to_dict(orient='records'),
+        'missingness': missingness_report(config, PROJECT_ROOT).to_dict(orient='records'),
     }
-    (MODELS_DIR / 'metrics.json').write_text(json.dumps(report, indent=2))
+    (out_dir / 'metrics.json').write_text(json.dumps(report, indent=2))
+    print(json.dumps(comparison['Uncertainty Ensemble'], indent=2))
+    print(f"{config.name} artifacts saved to {out_dir} in {time.time() - t0:.0f}s")
 
-    print(json.dumps(comparison, indent=2))
-    print(f"Artifacts saved to {MODELS_DIR} in {time.time() - t0:.0f}s")
+
+def main() -> None:
+    for config in REGISTRY.values():
+        train_disease(config)
+    print("\nAll diseases trained.")
 
 
 if __name__ == '__main__':

@@ -9,12 +9,14 @@ from theme import INK, MOSS, OXBLOOD, POP_GREY, styled
 
 
 def render(patient: pd.DataFrame, art: dict) -> None:
+    (ax_x, label_x), (ax_y, label_y) = art['config'].similar_axes
     view = art['similar'].query(patient)
     ens_risk = float(art['ensemble'].predict_mean(patient)[0])
 
     st.markdown(
         f"### Of the **{view.n_neighbors}** most similar patients, "
-        f"**{view.n_diabetic}** developed diabetes — {view.risk * 100:.0f}%")
+        f"**{view.n_diabetic}** developed {art['config'].name.lower()} — "
+        f"{view.risk * 100:.0f}%")
     c1, c2 = st.columns(2)
     c1.metric("Similar-patients risk", f"{view.risk * 100:.0f}%")
     c2.metric("Uncertainty Engine risk", f"{ens_risk * 100:.1f}%",
@@ -28,24 +30,24 @@ def render(patient: pd.DataFrame, art: dict) -> None:
            "for unusual patients, exactly when caution is right."))
 
     section("Where this patient sits",
-            "Blood glucose against BMI. Grey — the whole study. Colored — the "
-            "50 most similar patients. The diamond is this patient.")
+            f"{label_x} against {label_y.lower()}. Grey — the whole study. "
+            "Colored — the 50 most similar patients. The diamond is this patient.")
     pop = art['population_X'].assign(Outcome=art['population_y'].values)
-    pop_pts = pop[['Glucose', 'BMI']].assign(group='All patients')
+    pop_pts = pop[[ax_x, ax_y]].assign(group='All patients')
     nb = view.neighbor_rows
-    nb_pts = nb[['Glucose', 'BMI']].assign(
-        group=nb['Outcome'].map({1: 'Similar — developed diabetes',
+    nb_pts = nb[[ax_x, ax_y]].assign(
+        group=nb['Outcome'].map({1: 'Similar — developed the disease',
                                  0: 'Similar — stayed healthy'}))
-    me = patient[['Glucose', 'BMI']].assign(group='This patient')
+    me = patient[[ax_x, ax_y]].assign(group='This patient')
     plot_df = pd.concat([pop_pts, nb_pts, me], ignore_index=True).dropna()
 
     color_scale = alt.Scale(
         domain=['All patients', 'Similar — stayed healthy',
-                'Similar — developed diabetes', 'This patient'],
+                'Similar — developed the disease', 'This patient'],
         range=[POP_GREY, MOSS, OXBLOOD, INK])
     base = alt.Chart(plot_df).encode(
-        x=alt.X('Glucose:Q', title='Blood glucose (mg/dL)'),
-        y=alt.Y('BMI:Q', title='BMI'),
+        x=alt.X(f'{ax_x}:Q', title=label_x),
+        y=alt.Y(f'{ax_y}:Q', title=label_y),
         color=alt.Color('group:N', scale=color_scale, title=''))
     layers = (
         base.transform_filter(alt.datum.group == 'All patients').mark_circle(size=26, opacity=0.5)

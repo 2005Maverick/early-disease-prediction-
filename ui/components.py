@@ -15,8 +15,9 @@ def masthead() -> None:
     st.markdown(
         f"""<div class="edp-masthead">
         <h1>{_SEAL}Early Disease Prediction — Assessment Report</h1>
-        <div class="dek">Diabetes risk before symptoms. Two hundred models vote;
-        the fifty most similar real patients give an independent second opinion.</div>
+        <div class="dek">Disease risk before symptoms — diabetes and heart disease.
+        Two hundred models vote; the fifty most similar real patients give an
+        independent second opinion.</div>
         </div>""",
         unsafe_allow_html=True)
 
@@ -28,9 +29,10 @@ def intake_state() -> None:
         <p style="font-size:1.1rem">No assessment has been run yet.
         This instrument produces a risk report only when you ask it to.</p>
         <div class="step"><span class="n">1</span><span>
-          <span class="t">Enter the patient's data</span><br>
-          <span class="d">Use the intake form on the left. Values you don't know
-          can be marked unknown — the model imputes the study median.</span></span></div>
+          <span class="t">Choose a disease and enter the patient's data</span><br>
+          <span class="d">Pick diabetes or heart disease, then fill the intake
+          form on the left. Values you don't know can be marked unknown — the
+          model imputes the study median.</span></span></div>
         <div class="step"><span class="n">2</span><span>
           <span class="t">Run the assessment</span><br>
           <span class="d">All 200 models score the patient; the 50 most similar
@@ -43,23 +45,19 @@ def intake_state() -> None:
         unsafe_allow_html=True)
 
 
-def patient_strip(patient: pd.DataFrame) -> None:
+def patient_strip(patient: pd.DataFrame, config) -> None:
     """Who this report is about - always visible above the findings."""
     r = patient.iloc[0]
 
-    def fmt(v, unit=''):
-        return 'unknown' if pd.isna(v) else f'{v:g}{unit}'
+    def fmt(v):
+        return 'unknown' if pd.isna(v) else f'{v:g}'
 
+    cells = ''.join(
+        f'<span><span class="k">{label}</span> <b>{fmt(r[col])}</b></span>'
+        for col, label in config.strip_fields)
     st.markdown(
-        f"""<div class="edp-strip">
-        <span><span class="k">Glucose</span> <b>{fmt(r['Glucose'])}</b></span>
-        <span><span class="k">BMI</span> <b>{fmt(r['BMI'])}</b></span>
-        <span><span class="k">Age</span> <b>{fmt(r['Age'])}</b></span>
-        <span><span class="k">Blood pressure</span> <b>{fmt(r['BloodPressure'])}</b></span>
-        <span><span class="k">Insulin</span> <b>{fmt(r['Insulin'])}</b></span>
-        <span><span class="k">Pregnancies</span> <b>{fmt(r['Pregnancies'])}</b></span>
-        <span><span class="k">Family history</span> <b>{fmt(r['DiabetesPedigreeFunction'])}</b></span>
-        </div>""",
+        f'<div class="edp-strip"><span><span class="k">Assessment</span> '
+        f'<b>{config.name}</b></span>{cells}</div>',
         unsafe_allow_html=True)
     st.caption("Edit the intake form and run the assessment again to update this report.")
 
