@@ -182,7 +182,7 @@ function stat(slide, x, y, w, big, small, color) {
   const s = pres.addSlide();
   s.background = { color: WHITE };
   title(s, 'Deep Dive I — The Uncertainty Engine');
-  s.addImage({ path: FIG + 'arch_ensemble.png', x: 0.55, y: 1.62, w: 8.1, h: 3.28,
+  s.addImage({ path: FIG + 'arch_ensemble.png', x: 0.55, y: 2.1, w: 8.1, h: 2.32,
     shadow: shadow() });
   const x2 = 8.95, w2 = W - x2 - 0.55;
   s.addShape('roundRect', { x: x2, y: 1.62, w: w2, h: 3.28, rectRadius: 0.09,
