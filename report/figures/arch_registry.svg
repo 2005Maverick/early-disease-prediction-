@@ -1,0 +1,50 @@
+<svg viewBox="0 0 900 330" xmlns="http://www.w3.org/2000/svg" font-family="Georgia, serif">
+  <defs>
+    <marker id="a3" markerWidth="9" markerHeight="9" refX="7" refY="3.5" orient="auto">
+      <path d="M0,0 L7,3.5 L0,7" fill="none" stroke="#1c1a17" stroke-width="1.2"/>
+    </marker>
+  </defs>
+  <style>
+    .box { fill: #fffdf7; stroke: #1c1a17; stroke-width: 1.1; }
+    .plug { fill: #fffdf7; stroke: #8e2f22; stroke-width: 1.4; }
+    .t { font-size: 13px; fill: #1c1a17; font-weight: bold; text-anchor: middle; }
+    .s { font-size: 10.5px; fill: #6b6156; text-anchor: middle; }
+    .flow { stroke: #1c1a17; fill: none; stroke-width: 1.1; }
+  </style>
+
+  <text x="30" y="34" font-size="11" fill="#8e2f22" letter-spacing="2">DISEASE CONFIGS (PLUG-INS)</text>
+
+  <rect class="plug" x="30" y="50" width="215" height="110" rx="6"/>
+  <text class="t" x="137" y="74">diabetes.py</text>
+  <text class="s" x="137" y="94">8 features · Pima dataset</text>
+  <text class="s" x="137" y="110">intake form spec · scenarios</text>
+  <text class="s" x="137" y="126">ADA-style prevention rules</text>
+  <text class="s" x="137" y="146">zero-as-missing columns</text>
+
+  <rect class="plug" x="30" y="180" width="215" height="110" rx="6"/>
+  <text class="t" x="137" y="204">heart.py</text>
+  <text class="s" x="137" y="224">13 features · Cleveland dataset</text>
+  <text class="s" x="137" y="240">clinical dropdowns in form</text>
+  <text class="s" x="137" y="256">AHA-style prevention rules</text>
+  <text class="s" x="137" y="276">'?'-as-missing handling</text>
+
+  <rect x="300" y="115" width="150" height="80" rx="6" fill="#fffdf7" stroke="#1c1a17" stroke-dasharray="5 4"/>
+  <text class="t" x="375" y="145">DiseaseConfig</text>
+  <text class="s" x="375" y="163">one shared contract</text>
+  <text class="s" x="375" y="178">(base.py)</text>
+
+  <rect class="box" x="510" y="40" width="360" height="250" rx="6"/>
+  <text class="t" x="690" y="68">Shared, disease-agnostic engine</text>
+  <text class="s" x="690" y="96">data.py — mark + impute missing values per fold</text>
+  <text class="s" x="690" y="118">ensemble.py — 200-model Uncertainty Engine</text>
+  <text class="s" x="690" y="140">neighbors.py — Patients Like You (50-NN)</text>
+  <text class="s" x="690" y="162">risk.py — recall-rule threshold, tiers</text>
+  <text class="s" x="690" y="184">drivers.py / whatif.py — explanations</text>
+  <text class="s" x="690" y="206">train.py — honest CV, artifacts per disease</text>
+  <text class="s" x="690" y="228">ui/ — one Lab Report interface for all</text>
+  <text class="s" x="690" y="262" font-style="italic">adding disease #3 = one new config file + retrain</text>
+
+  <path class="flow" d="M245 105 C 270 105, 270 140, 294 145" marker-end="url(#a3)"/>
+  <path class="flow" d="M245 235 C 270 235, 270 175, 294 170" marker-end="url(#a3)"/>
+  <path class="flow" d="M450 155 H504" marker-end="url(#a3)"/>
+</svg>

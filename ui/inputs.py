@@ -39,12 +39,15 @@ def _render_field(spec: dict) -> float:
     raise ValueError(f"Unknown form field kind: {kind}")
 
 
-def intake_form() -> tuple[DiseaseConfig, pd.DataFrame | None, bool]:
+def intake_form(default_key: str | None = None
+                ) -> tuple[DiseaseConfig, pd.DataFrame | None, bool]:
     """Render the sidebar intake; return (config, patient, submitted)."""
     names = {c.name: c for c in REGISTRY.values()}
+    keys = [c.key for c in names.values()]
+    default_index = keys.index(default_key) if default_key in keys else 0
     with st.sidebar:
         st.header("Patient intake")
-        chosen = st.radio("Assessment for", list(names), index=0,
+        chosen = st.radio("Assessment for", list(names), index=default_index,
                           horizontal=True)
         config = names[chosen]
         with st.form(f"intake_{config.key}", border=False):

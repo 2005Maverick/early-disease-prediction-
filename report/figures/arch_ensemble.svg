@@ -1,0 +1,56 @@
+<svg viewBox="0 0 900 360" xmlns="http://www.w3.org/2000/svg" font-family="Georgia, serif">
+  <defs>
+    <marker id="a2" markerWidth="9" markerHeight="9" refX="7" refY="3.5" orient="auto">
+      <path d="M0,0 L7,3.5 L0,7" fill="none" stroke="#1c1a17" stroke-width="1.2"/>
+    </marker>
+  </defs>
+  <style>
+    .box { fill: #fffdf7; stroke: #1c1a17; stroke-width: 1.1; }
+    .t { font-size: 13px; fill: #1c1a17; font-weight: bold; text-anchor: middle; }
+    .s { font-size: 10.5px; fill: #6b6156; text-anchor: middle; }
+    .flow { stroke: #1c1a17; fill: none; stroke-width: 1.1; }
+  </style>
+
+  <rect class="box" x="20" y="130" width="130" height="70" rx="6"/>
+  <text class="t" x="85" y="158">Patient row</text>
+  <text class="s" x="85" y="176">8 / 13 features</text>
+  <text class="s" x="85" y="190">(unknowns = NaN)</text>
+
+  <!-- stacked members -->
+  <g>
+    <rect x="216" y="76" width="330" height="70" rx="6" fill="#fffdf7" stroke="#d9cfbc"/>
+    <rect x="208" y="68" width="330" height="70" rx="6" fill="#fffdf7" stroke="#d9cfbc"/>
+    <rect class="box" x="200" y="60" width="330" height="70" rx="6"/>
+    <text class="t" x="365" y="86">Member pipeline × 200</text>
+    <text class="s" x="365" y="105">median imputer → standard scaler → gradient boosting</text>
+    <text class="s" x="365" y="120">(100 trees, depth 3 — scikit-learn defaults)</text>
+  </g>
+  <text class="s" x="365" y="176">each member trained on its own</text>
+  <text class="s" x="365" y="190">bootstrap resample (draw n patients</text>
+  <text class="s" x="365" y="204">with replacement, seed 42+i)</text>
+
+  <rect class="box" x="600" y="60" width="130" height="70" rx="6"/>
+  <text class="t" x="665" y="88">200 risk</text>
+  <text class="t" x="665" y="104">estimates</text>
+
+  <rect class="box" x="770" y="30" width="115" height="56" rx="6"/>
+  <text class="t" x="827" y="53">Mean</text>
+  <text class="s" x="827" y="71">headline risk</text>
+
+  <rect class="box" x="770" y="106" width="115" height="56" rx="6"/>
+  <text class="t" x="827" y="129">5th–95th pct</text>
+  <text class="s" x="827" y="147">confidence band</text>
+
+  <rect class="box" x="770" y="182" width="115" height="56" rx="6"/>
+  <text class="t" x="827" y="205">Histogram</text>
+  <text class="s" x="827" y="223">shown to user</text>
+
+  <path class="flow" d="M150 165 C 170 165, 170 100, 194 96" marker-end="url(#a2)"/>
+  <path class="flow" d="M530 95 H594" marker-end="url(#a2)"/>
+  <path class="flow" d="M730 80 C 745 75, 748 62, 764 58" marker-end="url(#a2)"/>
+  <path class="flow" d="M730 100 C 748 110, 748 128, 764 132" marker-end="url(#a2)"/>
+  <path class="flow" d="M730 118 C 752 150, 748 200, 764 208" marker-end="url(#a2)"/>
+
+  <text x="450" y="300" font-size="12" fill="#1c1a17" text-anchor="middle" font-style="italic">"We ask 200 slightly different models and plot all their answers.</text>
+  <text x="450" y="318" font-size="12" fill="#1c1a17" text-anchor="middle" font-style="italic">Agreement means confidence; spread means the system honestly is not sure."</text>
+</svg>

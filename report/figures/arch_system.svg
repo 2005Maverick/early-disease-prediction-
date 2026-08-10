@@ -1,0 +1,72 @@
+<svg viewBox="0 0 900 470" xmlns="http://www.w3.org/2000/svg" font-family="Georgia, serif">
+  <defs>
+    <marker id="a" markerWidth="9" markerHeight="9" refX="7" refY="3.5" orient="auto">
+      <path d="M0,0 L7,3.5 L0,7" fill="none" stroke="#1c1a17" stroke-width="1.2"/>
+    </marker>
+    <marker id="ar" markerWidth="9" markerHeight="9" refX="7" refY="3.5" orient="auto">
+      <path d="M0,0 L7,3.5 L0,7" fill="none" stroke="#8e2f22" stroke-width="1.2"/>
+    </marker>
+  </defs>
+  <style>
+    .box { fill: #fffdf7; stroke: #1c1a17; stroke-width: 1.1; rx: 6; }
+    .accent { stroke: #8e2f22; stroke-width: 1.6; }
+    .t { font-size: 14px; fill: #1c1a17; font-weight: bold; text-anchor: middle; }
+    .s { font-size: 11px; fill: #6b6156; text-anchor: middle; }
+    .tier { font-size: 11px; fill: #8e2f22; letter-spacing: 2px; }
+    .flow { stroke: #1c1a17; fill: none; stroke-width: 1.1; }
+  </style>
+
+  <text class="tier" x="30" y="34">PHASE 1 — TRAINING (OFFLINE, ONCE PER DISEASE)</text>
+  <rect class="box" x="30" y="50" width="180" height="66" rx="6"/>
+  <text class="t" x="120" y="78">Datasets</text>
+  <text class="s" x="120" y="96">Pima 768 · Cleveland 303</text>
+
+  <rect class="box" x="255" y="50" width="180" height="66" rx="6"/>
+  <text class="t" x="345" y="78">Data layer</text>
+  <text class="s" x="345" y="96">hidden missing → NaN</text>
+
+  <rect class="box" x="480" y="50" width="180" height="66" rx="6"/>
+  <text class="t" x="570" y="78">Honest evaluation</text>
+  <text class="s" x="570" y="96">5-fold out-of-fold CV</text>
+
+  <rect class="box" x="705" y="50" width="165" height="66" rx="6"/>
+  <text class="t" x="787" y="78">Artifacts</text>
+  <text class="s" x="787" y="96">models/&lt;disease&gt;/</text>
+
+  <path class="flow" d="M210 83 H249" marker-end="url(#a)"/>
+  <path class="flow" d="M435 83 H474" marker-end="url(#a)"/>
+  <path class="flow" d="M660 83 H699" marker-end="url(#a)"/>
+
+  <path d="M787 116 V190 H430 V240" stroke="#8e2f22" stroke-dasharray="6 4" fill="none" stroke-width="1.3" marker-end="url(#ar)"/>
+  <text x="620" y="182" font-size="11" fill="#8e2f22">trained models, loaded lazily and cached</text>
+
+  <text class="tier" x="30" y="230">PHASE 2 — SERVING (ONLINE, PER PATIENT)</text>
+
+  <rect class="box" x="30" y="246" width="180" height="80" rx="6"/>
+  <text class="t" x="120" y="274">Intake form</text>
+  <text class="s" x="120" y="292">gated: nothing predicted</text>
+  <text class="s" x="120" y="307">until "Run assessment"</text>
+
+  <rect class="box accent" x="255" y="246" width="180" height="80" rx="6"/>
+  <text class="t" x="345" y="270">Uncertainty Engine</text>
+  <text class="s" x="345" y="288">200 bootstrap models</text>
+  <text class="s" x="345" y="303">risk distribution + band</text>
+
+  <rect class="box" x="255" y="356" width="180" height="66" rx="6"/>
+  <text class="t" x="345" y="382">Patients Like You</text>
+  <text class="s" x="345" y="400">50-NN · model-free 2nd opinion</text>
+
+  <rect class="box" x="510" y="246" width="360" height="176" rx="6"/>
+  <text class="t" x="690" y="272">Assessment Report</text>
+  <text class="s" x="690" y="296">Findings — tier, distribution, risk drivers</text>
+  <text class="s" x="690" y="316">Patients Like You — agreement check</text>
+  <text class="s" x="690" y="336">What-If Simulator — re-scored changes</text>
+  <text class="s" x="690" y="356">Preventive Plan — clinical-guideline rules</text>
+  <text class="s" x="690" y="376">Data &amp; Model Lab — honest metrics, calibration</text>
+  <text class="s" x="690" y="404" font-style="italic">every section reads ONE cached scoring pass</text>
+
+  <path class="flow" d="M210 286 H249" marker-end="url(#a)"/>
+  <path class="flow" d="M210 300 C 230 340, 230 389, 249 389" marker-end="url(#a)"/>
+  <path class="flow" d="M435 286 H504" marker-end="url(#a)"/>
+  <path class="flow" d="M435 389 H470 C 485 389, 485 370, 504 365" marker-end="url(#a)"/>
+</svg>

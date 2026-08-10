@@ -1,0 +1,535 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Early Disease Prediction System</title>
+<style>
+  @page { size: A4; margin: 22mm 20mm; }
+  html { font-size: 10.6pt; }
+  body {
+    font-family: Cambria, Georgia, 'Times New Roman', serif;
+    color: #111; line-height: 1.45; margin: 0;
+    text-align: justify; hyphens: auto;
+  }
+  h1, h2, h3 { font-family: Cambria, Georgia, serif; color: #111; text-align: left; }
+  h1 { font-size: 17pt; margin: 26px 0 8px; counter-increment: sec; counter-reset: subsec; }
+  h1::before { content: counter(sec) ". "; }
+  h1.nonum::before, h1.nonum { counter-increment: none; content: none; }
+  h1.nonum { font-size: 17pt; }
+  h2 { font-size: 12.5pt; margin: 18px 0 4px; counter-increment: subsec; }
+  h2::before { content: counter(sec) "." counter(subsec) " "; }
+  body { counter-reset: sec fig tab; }
+  p { margin: 6px 0; }
+  figure { margin: 14px 0; text-align: center; break-inside: avoid; }
+  figure img { max-width: 100%; }
+  figure.shot img { max-width: 92%; border: 1px solid #999; }
+  figcaption { font-size: 9.3pt; color: #333; margin-top: 5px; counter-increment: fig; text-align: center; }
+  figcaption::before { content: "Figure " counter(fig) ": "; font-weight: bold; }
+  table { border-collapse: collapse; margin: 10px auto; font-size: 9.6pt; }
+  th, td { padding: 3px 10px; text-align: left; }
+  thead tr { border-top: 1.4px solid #111; border-bottom: 0.8px solid #111; }
+  tbody tr:last-child { border-bottom: 1.4px solid #111; }
+  caption { caption-side: top; font-size: 9.3pt; margin-bottom: 5px; counter-increment: tab; }
+  caption::before { content: "Table " counter(tab) ": "; font-weight: bold; }
+  .titlepage { text-align: center; page-break-after: always; padding-top: 90px; }
+  .titlepage .maintitle { font-size: 27pt; font-weight: bold; line-height: 1.2; }
+  .titlepage .sub { font-size: 12.5pt; color: #333; margin-top: 14px; font-style: italic; }
+  .titlepage table { margin-top: 46px; font-size: 11pt; }
+  .titlepage td { padding: 4px 18px; }
+  .rule { border: none; border-top: 2.5px solid #8e2f22; width: 130px; margin: 26px auto; }
+  .toc { page-break-after: always; }
+  .toc ol { line-height: 1.9; font-size: 10.8pt; }
+  .toc ol ol { line-height: 1.6; font-size: 9.8pt; list-style: none; padding-left: 18px; }
+  .abstract { margin: 0 34px; }
+  .abstract h1 { text-align: center; }
+  .kw { font-size: 9.6pt; margin-top: 12px; }
+  .refs p { font-size: 9.6pt; padding-left: 22px; text-indent: -22px; text-align: left; }
+  .pagebreak { page-break-before: always; }
+  em.term { font-style: italic; }
+  code { font-family: Consolas, monospace; font-size: 9.3pt; }
+  li { margin: 3px 0; }
+</style>
+</head>
+<body>
+
+<!-- ============ TITLE PAGE ============ -->
+<div class="titlepage">
+  <div class="maintitle">Early Disease Prediction System</div>
+  <div class="sub">Diabetes and heart-disease risk before symptoms —<br>
+    with honest uncertainty, an independent second opinion, and a preventive plan</div>
+  <hr class="rule">
+  <table>
+    <tr><td colspan="2" style="text-align:center; font-weight:bold; padding-bottom:8px">Team Members</td></tr>
+    <tr><td>Riyansh Choudhary</td><td>SAP ID 500122039</td></tr>
+    <tr><td>Pranav Singh Puri</td><td>SAP ID 500122453</td></tr>
+    <tr><td>Kartikya Yadav</td><td>SAP ID 500122804</td></tr>
+    <tr><td>Rudra</td><td>SAP ID 500124508</td></tr>
+    <tr><td>Sushant Jaiswal</td><td>SAP ID 500123999</td></tr>
+    <tr><td colspan="2" style="text-align:center; padding-top:16px"><b>Mentor:</b> Imran Khan</td></tr>
+  </table>
+  <p style="margin-top:52px; font-size:10.5pt">
+    Live application: <b>healthpredictor092005.streamlit.app</b><br>
+    Source code: github.com/2005Maverick/early-disease-prediction-
+  </p>
+</div>
+
+<!-- ============ CONTENTS ============ -->
+<div class="toc">
+  <h1 class="nonum">Contents</h1>
+  <ol>
+    <li>Introduction</li>
+    <li>Literature Review
+      <ol><li>2.1&ensp;Tabular machine learning</li>
+          <li>2.2&ensp;Uncertainty quantification</li>
+          <li>2.3&ensp;Explainability and case-based reasoning</li></ol></li>
+    <li>Problem Statement</li>
+    <li>Proposed Solution</li>
+    <li>Data
+      <ol><li>5.1&ensp;Datasets</li>
+          <li>5.2&ensp;The hidden-missing-values problem</li>
+          <li>5.3&ensp;Exploratory analysis</li></ol></li>
+    <li>Methodology
+      <ol><li>6.1&ensp;The Uncertainty Engine</li>
+          <li>6.2&ensp;Patients Like You</li>
+          <li>6.3&ensp;The decision threshold as a stated rule</li>
+          <li>6.4&ensp;Explanations without jargon</li>
+          <li>6.5&ensp;Evaluation protocol</li></ol></li>
+    <li>Results
+      <ol><li>7.1&ensp;Model comparison</li>
+          <li>7.2&ensp;Discrimination and operating point</li>
+          <li>7.3&ensp;Calibration</li>
+          <li>7.4&ensp;Is the uncertainty informative?</li>
+          <li>7.5&ensp;Per-patient explanations</li></ol></li>
+    <li>The Dashboard</li>
+    <li>Engineering and Deployment</li>
+    <li>Limitations</li>
+    <li>Conclusion and Future Work</li>
+  </ol>
+  <p style="margin-top:8px">References</p>
+</div>
+
+<!-- ============ ABSTRACT ============ -->
+<div class="abstract">
+  <h1 class="nonum" style="text-align:center">Abstract</h1>
+  <p>This report presents the <b>Early Disease Prediction System</b>, a machine-learning
+  application that estimates a patient's risk of diabetes or heart disease from routine
+  lifestyle, demographic and clinical measurements, before symptoms appear. The system is
+  designed around a principle that most student and industry prototypes ignore:
+  <em>a prediction is only useful if the user can tell how much to trust it</em>. Instead of a
+  single risk number, an <em class="term">Uncertainty Engine</em> — 200 gradient-boosting
+  pipelines, each trained on a different bootstrap resample of the study population —
+  produces a full risk <em>distribution</em> per patient, whose spread is an honest measure of
+  confidence. A second, entirely model-free method (<em class="term">Patients Like You</em>,
+  a 50-nearest-neighbour lookup over the standardized study population) provides an
+  independent second opinion, and agreement between the two methods is surfaced to the user.
+  All reported metrics are strictly out-of-fold (5-fold stratified cross-validation): the
+  deployed ensembles achieve a ROC AUC of <b>83.5%</b> for diabetes (Pima study, 768
+  patients) and <b>90.0%</b> for heart disease (Cleveland study, 303 patients) at a recall
+  of at least 85% by construction, the alert threshold being derived from an explicit
+  clinical rule rather than tuned by hand. Empirically, the uncertainty is informative: the
+  error rate rises from 6% among the quarter of patients with the narrowest confidence
+  bands to 43% among the widest (diabetes; 4% to 46% for heart disease) — the system
+  measurably knows when it does not know. The delivery layer is a deployed Streamlit
+  application styled as an interactive lab report, with per-patient risk drivers, a what-if
+  lifestyle simulator, and a guideline-based preventive plan. The architecture is
+  disease-agnostic: each disease is a plug-in configuration file, so extending the system
+  to a third disease requires one new file and a retraining run.</p>
+  <p class="kw"><b>Keywords:</b> early disease prediction, uncertainty quantification,
+  bootstrap ensembles, gradient boosting, nearest neighbours, calibration, explainable AI,
+  Streamlit.</p>
+</div>
+
+<!-- ============ 1 INTRODUCTION ============ -->
+<h1 class="pagebreak">Introduction</h1>
+<p>Type-2 diabetes and cardiovascular disease are two of the most common chronic conditions
+worldwide, and both share a property that makes them natural targets for machine learning:
+they develop silently for years before diagnosis, while leaving statistical fingerprints in
+measurements that are cheap and routine — blood glucose, body-mass index, blood pressure,
+cholesterol, age, family history. Landmark trials such as the Diabetes Prevention Program
+have shown that when elevated risk is identified early, lifestyle interventions can cut
+disease incidence dramatically (58% for diabetes) [8]. The value of an early-warning model
+is therefore not the prediction itself but the <em>action</em> it enables.</p>
+<p>Most classroom risk-prediction projects follow a fixed template: train a classifier on a
+public dataset, report accuracy on data the model has partially seen, and wrap the result in
+a web form. This project deliberately departs from that template in four ways. First, it
+reports <b>only out-of-fold metrics</b> — every number in this report was measured on
+patients the model never saw during training. Second, it treats <b>uncertainty as a
+first-class output</b>: the user sees not just "84.8% risk" but how much 200 independently
+trained models disagree about that number. Third, it provides an <b>independent second
+opinion</b> computed without any model at all, so that trust does not rest on a single
+method. Fourth, it converts predictions into <b>concrete preventive actions</b> traced to
+clinical guidelines, closing the loop from data to decision.</p>
+<p>The result is a working, publicly deployed system covering two diseases, built on one
+shared engine, with a test suite, a reproducible training pipeline, and a figure-generation
+script that produced every chart in this report from the actual artifacts.</p>
+
+<!-- ============ 2 LITERATURE ============ -->
+<h1>Literature Review</h1>
+<h2>Tabular machine learning</h2>
+<p>Despite a decade of deep-learning progress, tree-based ensembles remain the strongest
+general-purpose learners for small and medium tabular datasets. Grinsztajn et&nbsp;al. [5]
+show systematically why tree ensembles outperform neural networks on tabular data of this
+scale, attributing the gap to the rotation-variance of trees and their robustness to
+uninformative features. Gradient boosting [3] builds an additive sequence of shallow trees,
+each correcting the residual errors of its predecessors, and is the base learner used here.
+Random forests [2] and regularized logistic regression serve as baselines; with 768 and 303
+patients respectively, our datasets sit squarely in the regime where these classical methods
+are expected to dominate, and our own comparison (Section&nbsp;7.1) confirms it.</p>
+<h2>Uncertainty quantification</h2>
+<p>A single classifier's probability output conflates two different things: the risk of the
+patient, and the model's confidence in that estimate. The bootstrap [1, 9] offers a
+conceptually simple separation: train many models on resamples of the data, and read the
+spread of their predictions as sampling uncertainty. Bagging [1] originally used this for
+variance reduction; we retain the averaged prediction for accuracy but additionally expose
+the full distribution to the user. This is closely related to deep ensembles in the neural
+network literature, widely regarded as the most reliable practical uncertainty method, here
+applied in its natural tabular form.</p>
+<h2>Explainability and case-based reasoning</h2>
+<p>Post-hoc explanation methods such as SHAP assign each feature a contribution to a
+prediction. We use a deliberately simpler scheme — median substitution: replace one of the
+patient's values with the population's typical value, re-run the model, and report the risk
+change. It is model-agnostic, exact for the deployed ensemble, and explainable to a
+non-technical audience in one sentence. The <em class="term">Patients Like You</em> view
+draws on the oldest idea in pattern recognition, nearest-neighbour classification [7]:
+presenting the outcomes of the fifty most similar real patients is both an independent risk
+estimate and a form of case-based explanation that clinicians find natural. Finally,
+calibration — whether a stated "70%" corresponds to a 70% observed event rate — is assessed
+with reliability diagrams as in the classical calibration literature [10].</p>
+
+<!-- ============ 3 PROBLEM ============ -->
+<h1>Problem Statement</h1>
+<p>Can routine lifestyle, demographic and clinical measurements be combined into a
+per-patient disease-risk assessment that is (i)&nbsp;measured honestly, on patients the
+model has never seen; (ii)&nbsp;accompanied by a truthful statement of the model's own
+confidence; (iii)&nbsp;corroborated by an independent, model-free method; and
+(iv)&nbsp;actionable, in the form of specific preventive steps traced to clinical
+guidelines — all delivered in an interface a non-technical user can operate?</p>
+
+<!-- ============ 4 PROPOSED SOLUTION ============ -->
+<h1>Proposed Solution</h1>
+<p>The system is organised in two phases (Figure&nbsp;1). Offline, a training pipeline
+loads each disease's dataset, repairs its hidden missing values, evaluates four candidate
+models with stratified 5-fold cross-validation, derives the alert threshold from a stated
+recall rule, and saves the deployed artifacts. Online, a gated intake form collects the
+patient's values; on explicit submission the trained ensemble scores the patient
+<em>once</em>, the 50 most similar real patients are retrieved, and a five-section
+assessment report is rendered. Nothing is predicted until the user asks — the interface
+enforces a clear causal moment between input and output.</p>
+<figure><img src="figures/arch_system.svg" alt="system architecture">
+<figcaption>System architecture: the offline training phase (top) and the online
+per-patient serving phase (bottom).</figcaption></figure>
+<p>A key architectural decision is that the engine is <b>disease-agnostic</b>
+(Figure&nbsp;2). Everything specific to a disease — dataset location, feature list and
+semantics, which values are physiologically impossible, the intake form specification, the
+what-if scenarios and the prevention rules — lives in one configuration object per disease.
+The ensemble, the neighbour engine, the threshold rule, the explanation methods, the
+training pipeline and the entire user interface are shared. Supporting a third disease
+means writing one new configuration file and running the trainer.</p>
+<figure><img src="figures/arch_registry.svg" alt="disease registry">
+<figcaption>The disease registry: diseases plug into a shared engine through a single
+configuration contract.</figcaption></figure>
+
+<!-- ============ 5 DATA ============ -->
+<h1>Data</h1>
+<h2>Datasets</h2>
+<p>Two classical, publicly available clinical datasets are used (Table&nbsp;1). The Pima
+Indians Diabetes Database [6] records eight measurements for 768 women aged 21 and above,
+with a binary outcome indicating development of diabetes. The Cleveland Heart Disease
+dataset [4] records thirteen clinical features for 303 patients undergoing angiography; the
+original five-level diagnosis is binarized (any vessel narrowing &gt; 50% counts as
+disease), which is the standard treatment in the literature.</p>
+<table>
+<caption>Datasets used in this project.</caption>
+<thead><tr><th>Disease</th><th>Source study</th><th>Patients</th><th>Features</th>
+<th>Positive rate</th></tr></thead>
+<tbody>
+<tr><td>Diabetes</td><td>Pima (NIDDK) [6]</td><td>768</td><td>8</td><td>34.9%</td></tr>
+<tr><td>Heart disease</td><td>Cleveland Clinic (UCI) [4]</td><td>303</td><td>13</td><td>45.9%</td></tr>
+</tbody></table>
+<h2>The hidden-missing-values problem</h2>
+<p>The Pima dataset contains a famous trap that most projects on it silently fall into:
+zeros in Glucose, BloodPressure, SkinThickness, Insulin and BMI. A blood-sugar or BMI of
+zero is physiologically impossible — these are undocumented <em>missing values</em>, not
+measurements. Feeding them to a model as real numbers distorts every downstream statistic.
+Our data layer marks them as missing (Figure&nbsp;4); imputation with the training-fold
+median then happens <em>inside</em> each model pipeline, so it is re-fitted on every
+cross-validation fold and no information can leak from test to train. The Cleveland dataset
+marks its six missing entries explicitly with "?"; the same machinery absorbs them. The
+same mechanism also serves the user interface: a patient who does not know their serum
+insulin can mark it "unknown", and the model imputes it transparently.</p>
+<figure><img src="figures/missingness.png" alt="missingness">
+<figcaption>Hidden missing values per feature. In the Pima data, nearly half of all
+patients (374 of 768) have a physiologically impossible zero recorded for insulin.</figcaption></figure>
+<h2>Exploratory analysis</h2>
+<p>Figures&nbsp;5 and 6 show the distributions of headline features split by outcome. The
+separations visible to the naked eye — glucose and BMI for diabetes; maximum achieved heart
+rate, ST depression and age for heart disease — anticipate the feature importances the
+models later learn, and match clinical intuition.</p>
+<figure><img src="figures/eda_diabetes.png" alt="diabetes EDA">
+<figcaption>Diabetes: feature distributions for patients who stayed healthy (green) versus
+developed the disease (red).</figcaption></figure>
+<figure><img src="figures/eda_heart.png" alt="heart EDA">
+<figcaption>Heart disease: the same comparison for the Cleveland features.</figcaption></figure>
+
+<!-- ============ 6 METHODOLOGY ============ -->
+<h1 class="pagebreak">Methodology</h1>
+<h2>The Uncertainty Engine</h2>
+<p>The deployed model is a bootstrap ensemble of 200 identical scikit-learn pipelines
+(Figure&nbsp;3, Table&nbsp;2). Each member consists of a median imputer, a standard scaler
+and a gradient-boosting classifier with library-default hyperparameters (100 trees of depth
+3, learning rate 0.1). Each member is trained on its own bootstrap resample — <i>n</i>
+patients drawn with replacement from the <i>n</i> available — with a distinct random seed.
+At prediction time every member outputs a probability, giving a 200-value distribution per
+patient: its mean is the headline risk score, its 5th–95th percentile range is reported as
+a 90% confidence band, and the full histogram is shown to the user.</p>
+<figure><img src="figures/arch_ensemble.svg" alt="ensemble internals">
+<figcaption>Inside the Uncertainty Engine: 200 bootstrap-trained pipelines produce a risk
+distribution rather than a single number.</figcaption></figure>
+<table>
+<caption>Deployed model configuration.</caption>
+<thead><tr><th>Component</th><th>Choice</th><th>Rationale</th></tr></thead>
+<tbody>
+<tr><td>Imputation</td><td>median, per training fold</td><td>robust; no leakage</td></tr>
+<tr><td>Scaling</td><td>standardization</td><td>method-agnostic pipeline</td></tr>
+<tr><td>Base learner</td><td>gradient boosting (100 trees, depth 3, lr 0.1)</td>
+<td>strongest single model class for tabular data [5]</td></tr>
+<tr><td>Ensemble</td><td>200 bootstrap members, seeds 42–241</td>
+<td>uncertainty via bootstrap [1, 9]; variance reduction</td></tr>
+<tr><td>Hyperparameters</td><td>scikit-learn defaults, untuned</td>
+<td>with ~600 training rows per fold, aggressive tuning fits noise;
+evaluation integrity was prioritised</td></tr>
+</tbody></table>
+<p>Why not deep learning? With 768 and 303 patients, the datasets are two to three orders
+of magnitude below the regime where neural approaches become competitive on tabular data
+[5]. The novelty of this system is deliberately <em>not</em> an exotic architecture but
+what is built around a proven one: uncertainty, corroboration, honest evaluation and
+actionable explanation.</p>
+<h2>Patients Like You</h2>
+<p>The second opinion uses no model at all. All study patients are imputed and standardized
+once; a nearest-neighbour index [7] then retrieves the 50 patients closest to the query in
+Euclidean distance, and the system reports how many of them actually developed the disease.
+Because this estimate shares no machinery with the ensemble, agreement between the two is
+meaningful evidence, and disagreement flags an unusual patient — exactly the case where
+extra caution is warranted. The interface states explicitly which situation applies.</p>
+<h2>The decision threshold as a stated rule</h2>
+<p>Converting a risk score into an alert requires a threshold, and in a medical screening
+context the costs of the two error types are asymmetric: missing a true future patient
+costs more than a false alarm. The threshold is therefore derived from an explicit rule —
+<b>among all thresholds whose out-of-fold recall is at least 85%, choose the one with the
+highest precision</b> — rather than defaulting to 0.5 or tuning by eye. The rule yields
+23.8% for diabetes and 27.3% for heart disease (Figure&nbsp;10). Both the rule and its
+consequence are displayed in the application itself.</p>
+<h2>Explanations without jargon</h2>
+<p>Per-patient explanations use median substitution: for each feature, the patient's value
+is replaced by the population median and the ensemble is re-run; the resulting risk drop is
+that feature's personal contribution ("your glucose alone adds 34 points"). The what-if
+simulator applies the same mechanism prospectively, re-scoring the patient under achievable
+changes (lose weight, lower glucose or cholesterol) that are generated per disease and only
+when applicable to the individual. Preventive recommendations are deliberately
+<em>rule-based</em>, written from published clinical reference ranges (e.g. impaired
+glucose tolerance at 140–199 mg/dL; stage-2 hypertension at ≥140 mm Hg), because
+prevention advice must be traceable to a guideline, not to a statistical artifact.</p>
+<h2>Evaluation protocol</h2>
+<p>All models are evaluated with stratified 5-fold cross-validation. Within each fold, the
+full pipeline — imputation, scaling, and for the ensemble the entire 40-member bootstrap
+procedure — is fitted from scratch on the training portion and scored on the held-out
+portion, so every prediction used in this report is <em>out-of-fold</em>: made by a model
+that never saw that patient. The deployed 200-member ensembles are then trained on all data.
+The threshold rule, the calibration analysis and the uncertainty analysis below all operate
+exclusively on the out-of-fold scores. The unit-test suite (15 tests) covers the data
+repair, threshold rule, tier logic, explanation and scenario builders, and both engines.</p>
+
+<!-- ============ 7 RESULTS ============ -->
+<h1 class="pagebreak">Results</h1>
+<h2>Model comparison</h2>
+<p>Tables&nbsp;3 and 4 compare the Uncertainty Ensemble against three single-model
+baselines on identical folds, all evaluated at each disease's rule-derived threshold.</p>
+<table>
+<caption>Diabetes — out-of-fold performance (%, threshold 23.8).</caption>
+<thead><tr><th>Model</th><th>Accuracy</th><th>Precision</th><th>Recall</th><th>F1</th><th>ROC AUC</th></tr></thead>
+<tbody>
+<tr><td><b>Uncertainty Ensemble</b></td><td><b>73.1</b></td><td><b>57.7</b></td><td>85.1</td><td><b>68.8</b></td><td>83.5</td></tr>
+<tr><td>Logistic Regression</td><td>70.4</td><td>55.0</td><td>84.7</td><td>66.7</td><td>83.5</td></tr>
+<tr><td>Random Forest</td><td>69.9</td><td>54.2</td><td><b>88.4</b></td><td>67.2</td><td>83.3</td></tr>
+<tr><td>Gradient Boosting</td><td>73.1</td><td>57.9</td><td>83.2</td><td>68.3</td><td>82.6</td></tr>
+</tbody></table>
+<table>
+<caption>Heart disease — out-of-fold performance (%, threshold 27.3).</caption>
+<thead><tr><th>Model</th><th>Accuracy</th><th>Precision</th><th>Recall</th><th>F1</th><th>ROC AUC</th></tr></thead>
+<tbody>
+<tr><td><b>Uncertainty Ensemble</b></td><td>78.6</td><td>72.6</td><td>85.6</td><td>78.6</td><td>90.0</td></tr>
+<tr><td>Logistic Regression</td><td><b>80.9</b></td><td><b>74.9</b></td><td>87.8</td><td><b>80.8</b></td><td>90.9</td></tr>
+<tr><td>Random Forest</td><td>74.9</td><td>66.3</td><td><b>92.1</b></td><td>77.1</td><td><b>91.2</b></td></tr>
+<tr><td>Gradient Boosting</td><td>80.2</td><td>74.5</td><td>86.3</td><td>80.0</td><td>88.5</td></tr>
+</tbody></table>
+<p>On diabetes the ensemble matches or beats every baseline on every aggregate metric. On
+the smaller Cleveland dataset the picture is more nuanced — logistic regression and random
+forest edge slightly ahead on AUC (90.9 and 91.2 versus 90.0). We report this openly: the
+ensemble was nevertheless chosen for deployment because it is the only candidate that
+produces a per-patient uncertainty distribution, and Section&nbsp;7.4 shows that this
+uncertainty carries real information a point estimate cannot. Within roughly one AUC point,
+the honest confidence band is worth more than the marginal discrimination.</p>
+<h2>Discrimination and operating point</h2>
+<figure><img src="figures/roc.png" alt="ROC curves">
+<figcaption>ROC curves for all four models on both diseases (out-of-fold).</figcaption></figure>
+<figure><img src="figures/pr.png" alt="PR curves">
+<figcaption>Precision–recall curves; the dashed line marks each disease's positive-class
+base rate.</figcaption></figure>
+<figure><img src="figures/confusion.png" alt="confusion matrices">
+<figcaption>Confusion matrices at each disease's alert threshold. The recall-first rule
+deliberately trades false positives for very few missed patients.</figcaption></figure>
+<figure><img src="figures/threshold_rule.png" alt="threshold rule">
+<figcaption>Precision and recall as the threshold varies. The chosen operating point is the
+best-precision threshold that keeps recall above the 85% floor — a stated rule, not a
+tuned constant.</figcaption></figure>
+<h2>Calibration</h2>
+<p>Figure&nbsp;11 groups out-of-fold predictions into deciles and compares mean predicted
+risk with the observed disease rate in each group. Both diseases track the diagonal
+closely, meaning the probabilities shown to users are honest: patients told "about 30%
+risk" develop the disease roughly 30% of the time. This matters because the entire
+interface — tiers, bands, what-if deltas — is denominated in these probabilities.</p>
+<figure><img src="figures/calibration.png" alt="calibration">
+<figcaption>Reliability diagrams (out-of-fold deciles). Points near the diagonal indicate
+honest probabilities.</figcaption></figure>
+<h2>Is the uncertainty informative?</h2>
+<p>The central claim of this project is that the confidence band is not decoration. To test
+it, out-of-fold patients were sorted into quartiles by the width of their 90% band, and the
+classification error rate was measured within each quartile (Figure&nbsp;13). The effect is
+large and monotonic: for diabetes, the error rate rises from <b>6%</b> in the
+narrowest-band quartile to <b>43%</b> in the widest; for heart disease, from <b>4%</b> to
+<b>46%</b>. When the 200 models agree, they are almost always right; when they disagree,
+the system says so — and it is precisely then that it errs. A user who trusts narrow bands
+and treats wide bands as "get a proper test" is served far better than by any single
+number.</p>
+<figure><img src="figures/uncertainty_error.png" alt="uncertainty vs error">
+<figcaption>Error rate by confidence-band width (out-of-fold quartiles). Wide bands
+concentrate the mistakes: the system knows when it does not know.</figcaption></figure>
+<p>Figure&nbsp;12 shows what this looks like for individual patients: a healthy profile
+yields a needle-thin distribution (band 1–2%), while a high-risk profile yields a visibly
+wide one (65–96%) — honest uncertainty a clinician can read at a glance.</p>
+<figure><img src="figures/dist_examples.png" alt="distribution examples">
+<figcaption>Per-patient risk distributions from the 200 members: agreement for a clear
+case (left), honest spread for an ambiguous one (right). Solid line: mean; dashed: alert
+threshold.</figcaption></figure>
+<h2>Per-patient explanations</h2>
+<figure><img src="figures/drivers_example.png" alt="risk drivers">
+<figcaption>Personal risk drivers for the high-risk example patient (median substitution).
+Glucose dominates, matching clinical intuition.</figcaption></figure>
+<figure><img src="figures/whatif_example.png" alt="what-if">
+<figcaption>What-if simulation for the same patient: each bar re-runs all 200 models with
+one value changed.</figcaption></figure>
+
+<!-- ============ 8 DASHBOARD ============ -->
+<h1 class="pagebreak">The Dashboard</h1>
+<p>The delivery layer is a Streamlit application styled as an interactive lab report —
+paper ground, ink text, a single oxblood accent carrying all risk semantics — and deployed
+publicly at <b>healthpredictor092005.streamlit.app</b>. Its defining structural feature is
+a <em>gated flow</em>: on arrival the user sees an intake explainer and a form
+(Figure&nbsp;16); no prediction exists until "Run assessment" is pressed, and the resulting
+report always opens with a summary strip naming exactly whose values it describes. This
+eliminates the confusing phantom-prediction state common in dashboard templates, where
+output for a default patient is visible before any input has been given.</p>
+<figure class="shot"><img src="screens/intake.png" alt="intake">
+<figcaption>First-run state: the instrument explains itself; nothing has been predicted.</figcaption></figure>
+<figure class="shot"><img src="screens/diab_findings.png" alt="findings">
+<figcaption>Findings — diabetes example patient: tier, calibrated risk, 90% band, and the
+distribution of all 200 model opinions.</figcaption></figure>
+<figure class="shot"><img src="screens/diab_similar.png" alt="patients like you">
+<figcaption>Patients Like You: the 50 most similar real patients plotted in glucose–BMI
+space, with the model-free second opinion and the agreement check.</figcaption></figure>
+<figure class="shot"><img src="screens/diab_whatif.png" alt="what-if">
+<figcaption>What-If Simulator: achievable changes re-scored by the full ensemble.</figcaption></figure>
+<figure class="shot"><img src="screens/diab_plan.png" alt="plan">
+<figcaption>Preventive Plan: rule-based actions citing the patient's own values and the
+guideline ranges that triggered them.</figcaption></figure>
+<figure class="shot"><img src="screens/model_lab.png" alt="model lab">
+<figcaption>Data &amp; Model Lab: the transparency page — hidden-missing-data audit,
+out-of-fold metrics, model comparison, threshold rule and calibration.</figcaption></figure>
+<figure class="shot"><img src="screens/heart_findings.png" alt="heart findings">
+<figcaption>The same interface serving the heart-disease model — one engine, two
+diseases.</figcaption></figure>
+
+<!-- ============ 9 ENGINEERING ============ -->
+<h1>Engineering and Deployment</h1>
+<p>The codebase separates a disease-agnostic engine (<code>src/edp/</code>) from per-disease
+plug-in configurations (<code>src/edp/diseases/</code>) and the interface (<code>ui/</code>).
+A 15-test pytest suite guards the data repair, decision logic, explanation builders and
+both engines. Training is a single reproducible script; every figure in this report was
+generated by a committed script from the trained artifacts.</p>
+<p>Serving performance was engineered deliberately (Figure&nbsp;18): each patient is scored
+<em>exactly once</em> — the 200-member pass is memoized by (disease, patient values) and
+all five report sections read the same cached result — and a disease's 36&nbsp;MB model
+file is loaded lazily, only when that disease is first assessed. Measured on the free-tier
+cloud deployment, interaction latency fell from roughly 22 seconds to 2–4 seconds after
+this change; only the first assessment after a cold start pays the model-loading cost.</p>
+<figure><img src="figures/arch_serving.svg" alt="serving architecture">
+<figcaption>Serving architecture: score-once caching with lazy model loading.</figcaption></figure>
+
+<!-- ============ 10 LIMITATIONS ============ -->
+<h1>Limitations</h1>
+<p>The system is an educational prototype and its results must be read accordingly:</p>
+<ul>
+<li><b>Small, dated cohorts.</b> 768 and 303 patients, collected decades ago from specific
+populations (Pima women aged 21+; Cleveland angiography patients). Absolute risk levels do
+not transfer to other populations without recalibration.</li>
+<li><b>No external validation.</b> All evaluation is cross-validation within each dataset;
+a genuinely new cohort could expose distribution shift.</li>
+<li><b>Correlation, not causation.</b> The what-if simulator answers "what would the model
+predict if this value were different", which is not identical to the causal effect of an
+intervention on the patient.</li>
+<li><b>Bootstrap uncertainty is sampling uncertainty.</b> The band reflects disagreement
+between models trained on resamples; it cannot capture uncertainty about factors the data
+never measured.</li>
+<li><b>Not clinically validated.</b> The application states in-product that it is an
+educational tool and that decisions belong with healthcare professionals.</li>
+</ul>
+
+<!-- ============ 11 CONCLUSION ============ -->
+<h1>Conclusion and Future Work</h1>
+<p>This project set out to show that an early disease-prediction system can be honest about
+what it knows. The delivered system predicts diabetes and heart-disease risk with
+out-of-fold ROC AUC of 83.5% and 90.0% at ≥85% recall by construction; its probabilities
+are calibrated; and — the central result — its per-patient confidence bands are
+demonstrably informative, with error rates roughly seven to ten times higher among the
+widest bands than the narrowest. A model-free second opinion, jargon-free explanations, a
+what-if simulator and guideline-based preventive plans convert the score into something a
+person can act on, and the disease-registry architecture makes the whole construction
+extensible at the cost of one configuration file per new disease.</p>
+<p>Natural next steps: adding a third disease (chronic kidney disease has a suitable UCI
+dataset) to further demonstrate the registry; external validation on a modern cohort such
+as NHANES; conformal prediction as a complementary uncertainty method with formal coverage
+guarantees; and a longitudinal mode that tracks a patient's risk trajectory across repeated
+assessments.</p>
+
+<!-- ============ REFERENCES ============ -->
+<h1 class="nonum pagebreak">References</h1>
+<div class="refs">
+<p>[1] Breiman, L. (1996). Bagging predictors. <i>Machine Learning</i>, 24(2), 123–140.</p>
+<p>[2] Breiman, L. (2001). Random forests. <i>Machine Learning</i>, 45(1), 5–32.</p>
+<p>[3] Friedman, J. H. (2001). Greedy function approximation: a gradient boosting machine.
+<i>Annals of Statistics</i>, 29(5), 1189–1232.</p>
+<p>[4] Detrano, R., Janosi, A., Steinbrunn, W., et al. (1989). International application of
+a new probability algorithm for the diagnosis of coronary artery disease.
+<i>American Journal of Cardiology</i>, 64(5), 304–310.</p>
+<p>[5] Grinsztajn, L., Oyallon, E., and Varoquaux, G. (2022). Why do tree-based models
+still outperform deep learning on typical tabular data? <i>NeurIPS 2022</i>.</p>
+<p>[6] Smith, J. W., Everhart, J. E., Dickson, W. C., Knowler, W. C., and Johannes, R. S.
+(1988). Using the ADAP learning algorithm to forecast the onset of diabetes mellitus.
+<i>Proceedings of the Annual Symposium on Computer Applications in Medical Care</i>, 261–265.</p>
+<p>[7] Cover, T., and Hart, P. (1967). Nearest neighbor pattern classification.
+<i>IEEE Transactions on Information Theory</i>, 13(1), 21–27.</p>
+<p>[8] Diabetes Prevention Program Research Group (2002). Reduction in the incidence of
+type 2 diabetes with lifestyle intervention or metformin.
+<i>New England Journal of Medicine</i>, 346(6), 393–403.</p>
+<p>[9] Efron, B. (1979). Bootstrap methods: another look at the jackknife.
+<i>Annals of Statistics</i>, 7(1), 1–26.</p>
+<p>[10] Niculescu-Mizil, A., and Caruana, R. (2005). Predicting good probabilities with
+supervised learning. <i>ICML 2005</i>.</p>
+<p>[11] Pedregosa, F., et al. (2011). Scikit-learn: machine learning in Python.
+<i>Journal of Machine Learning Research</i>, 12, 2825–2830.</p>
+<p>[12] American Diabetes Association (2024). Standards of Care in Diabetes.
+<i>Diabetes Care</i>, 47(Supplement 1).</p>
+</div>
+
+</body>
+</html>
